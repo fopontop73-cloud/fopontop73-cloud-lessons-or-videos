@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>منصة الدروس</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h1>منصة الدروس</h1>
+
+<!-- فورم التسجيل والدخول -->
+<div id="authSection">
+  <h3>تسجيل دخول / إنشاء حساب</h3>
+  <input type="email" id="email" placeholder="ادخل البريد الإلكتروني">
+  <input type="password" id="password" placeholder="كلمة السر">
+  <button onclick="signup()">إنشاء حساب</button>
+  <button onclick="login()">تسجيل دخول</button>
+</div>
+
+<!-- عرض الدروس بعد تسجيل الدخول -->
+<div id="lessonsList" style="display:none;">
+  <h3>الدروس المتاحة</h3>
+</div>
+
+<!-- مكتبة Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+console.log("JavaScript is working");
+
+// إنشاء Supabase Client
+const { createClient } = supabase;
+
+const supabaseClient = createClient(
+  "https://narakieunwgzeozzxkxu.supabase.co", // Project URL
+  "sb_publishable_0iF0iT70IA9OGIUPfuaXdw_dnQYBXaF" // Public anon key
+);
+
+// إنشاء حساب جديد
+async function signup() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("من فضلك أدخل البريد وكلمة السر");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+  if (error) { alert(error.message); return; }
+
+  const user = data.user;
+
+  const { error: profileError } = await supabaseClient
+    .from("profiles")
+    .insert([{ id: user.id, email: user.email }]);
+
+  if (profileError) { alert(profileError.message); }
+  else { alert("تم إنشاء الحساب بنجاح ✅"); }
+}
+
+// تسجيل الدخول
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) {
+    alert("من فضلك أدخل البريد وكلمة السر");
+    return;
+  }
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) { alert(error.message); return; }
+
+  alert("تم تسجيل الدخول ✅");
+
+  document.getElementById("authSection").style.display = "none";
+  document.getElementById("lessonsList").style.display = "block";
+
+  loadLessons();
+}
+
+// تحميل الدروس
+async function loadLessons() {
+  const { data, error } = await supabaseClient.from("lessons").select("*");
+
+  if (error) { console.log(error); alert("خطأ في تحميل الدروس"); return; }
+
+  let html = "";
+  data.forEach(lesson => {
+    html += `<div class="lesson">
+      <h4>${lesson.title}</h4>
+      <p>${lesson.description}</p>
+      <button onclick="viewLesson('${lesson.video_path}')">شاهد الدرس</button>
+    </div>`;
+  });
+
+  document.getElementById("lessonsList").innerHTML = html;
+}
+
+// فتح فيديو الدرس
+async function viewLesson(videoPath) {
+  const { data, error } = await supabaseClient
+    .storage
+    .from("lessons-videos")
+    .createSignedUrl(videoPath, 3600);
+
+  if (error) { alert("خطأ في الوصول للفيديو"); return; }
+
+  window.open(data.signedUrl, "_blank");
+}
+
+// ربط الدوال بالـ window
+window.signup = signup;
+window.login = login;
+window.viewLesson = viewLesson;
+</script>
+</body>
+</html>
