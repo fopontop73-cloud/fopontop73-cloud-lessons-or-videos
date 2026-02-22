@@ -15,6 +15,7 @@ async function signup() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
 
+  // ← هنا أضفنا emailRedirectTo للرابط النهائي على GitHub Pages
   const { data, error } = await supabase.auth.signUp(
     { email, password },
     { emailRedirectTo: 'https://fopontop73-cloud.github.io/fopontop73-cloud-lessons-or-videos/' }
