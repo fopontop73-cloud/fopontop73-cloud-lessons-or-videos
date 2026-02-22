@@ -14,7 +14,7 @@ async function signup() {
 
   const { data, error } = await supabase.auth.signUp(
     { email, password },
-    { emailRedirectTo: window.location.href }
+    { emailRedirectTo: 'https://fopontop73-cloud.github.io/fopontop73-cloud-lessons-or-videos/' }
   );
 
   if (error) {
