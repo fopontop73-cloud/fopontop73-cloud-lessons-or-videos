@@ -1,11 +1,14 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+// إعداد Supabase
 const supabaseUrl = 'https://narakieunwgzeozzxkxu.supabase.co';
 const supabaseKey = 'sb_publishable_0iF0iT70IA9OGIUPfuaXdw_dnQYBXaF';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// زر إنشاء الحساب
 const signupBtn = document.getElementById('signupBtn');
 
+// دالة إنشاء حساب
 async function signup() {
   signupBtn.disabled = true;
 
@@ -27,6 +30,7 @@ async function signup() {
   signupBtn.disabled = false;
 }
 
+// دالة تسجيل الدخول
 async function login() {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -43,6 +47,7 @@ async function login() {
   loadLessons();
 }
 
+// تحميل الدروس
 async function loadLessons() {
   const { data, error } = await supabase.from('lessons').select('*');
   if (error) { console.log(error); return; }
@@ -58,6 +63,7 @@ async function loadLessons() {
   document.getElementById('lessonsList').innerHTML = html;
 }
 
+// عرض الدرس بالفيديو
 async function viewLesson(videoPath) {
   const { data, error } = await supabase
     .storage
@@ -68,6 +74,7 @@ async function viewLesson(videoPath) {
   window.open(data.signedUrl, '_blank');
 }
 
+// ربط الدوال بالواجهة
 window.signup = signup;
 window.login = login;
 window.viewLesson = viewLesson;
